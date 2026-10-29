@@ -1,0 +1,17 @@
+{% extends "loja/base.html" %}
+{% block conteudo %}
+<div class="caixa">
+  <h2>Comprovante #{{ venda.id }}</h2>
+  <p>{{ venda.criada_em|date:"d/m/Y H:i" }} · Atendente: {{ venda.atendente.username }}</p>
+  <table>
+    {% for i in venda.itens.all %}
+    <tr><td>{{ i.quantidade }} × {{ i.produto.nome }} ({{ i.preco }})</td><td class="dir">{{ i.subtotal }}</td></tr>
+    {% endfor %}
+    <tr><th>Total</th><th class="dir">{{ venda.total }}</th></tr>
+  </table>
+  <p>Pagamento: {{ venda.get_forma_pagamento_display }}
+    {% if venda.forma_pagamento == "dinheiro" %}· Troco: {{ venda.troco }}{% endif %}</p>
+  <p><small>Sem valor fiscal.</small></p>
+  <a href="{% url 'pedido' %}"><button class="b" type="button">Nova venda</button></a>
+</div>
+{% endblock %}

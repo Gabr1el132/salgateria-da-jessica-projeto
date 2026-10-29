@@ -1,0 +1,21 @@
+{% extends "loja/base.html" %}
+{% block conteudo %}
+<h2>Pagamento</h2>
+<table>
+  {% for l in linhas %}<tr><td>{{ l.qtd }} × {{ l.produto.nome }}</td><td>{{ l.subtotal }}</td></tr>{% endfor %}
+  <tr><th>Total</th><th>{{ total }}</th></tr>
+</table>
+
+{% if erro %}<div class="msg" style="margin-top:12px">{{ erro }}</div>{% endif %}
+<form method="post" class="caixa" style="margin-top:12px">{% csrf_token %}
+  <p>
+    <label><input type="radio" name="forma" value="dinheiro" checked> Dinheiro</label>
+    <label><input type="radio" name="forma" value="pix"> Pix</label>
+    <label><input type="radio" name="forma" value="cartao"> Cartão</label>
+  </p>
+  <p><label>Valor recebido (só dinheiro): R$ <input name="recebido" placeholder="0,00" size="8"></label></p>
+  <p><small>Pix e cartão: confirme o pagamento na maquininha/app antes de concluir.</small></p>
+  <button class="b">Concluir venda</button>
+  <a href="{% url 'pedido' %}">Voltar</a>
+</form>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "loja/base.html" %}
+{% block conteudo %}
+<h2>Vendas</h2>
+<table>
+  <tr><th>#</th><th>Data</th><th>Atendente</th><th>Pagamento</th><th>Total</th></tr>
+  {% for v in vendas %}
+  <tr>
+    <td><a href="{% url 'comprovante' v.id %}">{{ v.id }}</a></td>
+    <td>{{ v.criada_em|date:"d/m/Y H:i" }}</td><td>{{ v.atendente.username }}</td>
+    <td>{{ v.get_forma_pagamento_display }}</td><td>{{ v.total }}</td>
+  </tr>
+  {% empty %}<tr><td colspan="5">Nenhuma venda registrada.</td></tr>{% endfor %}
+</table>
+{% endblock %}

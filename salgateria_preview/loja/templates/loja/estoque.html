@@ -1,0 +1,11 @@
+{% extends "loja/base.html" %}
+{% block conteudo %}
+<h2>Estoque</h2>
+<table>
+  <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Saldo</th></tr>
+  {% for p in produtos %}
+  <tr><td>{{ p.nome }}</td><td>{{ p.categoria }}</td><td>{{ p.preco }}</td><td>{{ p.saldo }}</td></tr>
+  {% endfor %}
+</table>
+<p><small>Para repor ou cadastrar produtos nesta prévia, use o <a href="/admin/">Admin</a>.</small></p>
+{% endblock %}

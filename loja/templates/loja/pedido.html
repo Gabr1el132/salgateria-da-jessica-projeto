@@ -1,0 +1,48 @@
+{% extends "loja/base.html" %}
+{% block conteudo %}
+<h2>Nova venda</h2>
+
+<form method="get" class="caixa">
+  <input name="q" value="{{ busca }}" placeholder="Buscar produto ou categoria">
+  <button class="b">Buscar</button>
+</form>
+
+<table>
+  <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Saldo</th><th></th></tr>
+  {% for p in produtos %}
+  <tr>
+    <td>{{ p.nome }}</td><td>{{ p.categoria }}</td><td>{{ p.preco }}</td><td>{{ p.saldo }}</td>
+    <td class="dir">
+      {% if p.saldo > 0 %}
+      <form method="post" action="{% url 'adicionar' p.id %}" class="inline">{% csrf_token %}
+        <input type="number" name="qtd" value="1" min="1" style="width:55px">
+        <button class="b">Adicionar</button>
+      </form>
+      {% else %}sem saldo{% endif %}
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5">Nenhum produto encontrado.</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Pedido</h3>
+<table>
+  {% for l in linhas %}
+  <tr>
+    <td>{{ l.qtd }} × {{ l.produto.nome }}</td><td>{{ l.subtotal }}</td>
+    <td class="dir">
+      <form method="post" action="{% url 'remover' l.produto.id %}" class="inline">{% csrf_token %}
+        <button class="b cinza">Remover</button>
+      </form>
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td>O pedido está vazio.</td></tr>
+  {% endfor %}
+</table>
+{% if linhas %}
+<p><strong>Total: {{ total }}</strong>
+  <a href="{% url 'pagamento' %}"><button class="b" type="button">Ir para o pagamento</button></a></p>
+{% endif %}
+{% endblock %}

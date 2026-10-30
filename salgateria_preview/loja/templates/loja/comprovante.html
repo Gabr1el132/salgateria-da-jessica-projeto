@@ -1,17 +1,42 @@
 {% extends "loja/base.html" %}
+{% load dinheiro %}
 {% block conteudo %}
-<div class="caixa">
-  <h2>Comprovante #{{ venda.id }}</h2>
-  <p>{{ venda.criada_em|date:"d/m/Y H:i" }} · Atendente: {{ venda.atendente.username }}</p>
-  <table>
+<div class="duas">
+  <section class="cartao sucesso no-print">
+    <div class="check"><svg class="i"><use href="#i-check"/></svg></div>
+    <h1>Venda registrada</h1>
+    <p class="sub">O recebimento foi confirmado e o estoque foi atualizado. Apresente o comprovante ao cliente.</p>
+    <div class="linha-kv"><span>Identificador</span><b>{{ venda.codigo }}</b></div>
+    <div class="linha-kv"><span>Situação</span><span class="selo situ">Concluída</span></div>
+    {% if venda.forma_pagamento == "dinheiro" %}
+    <div class="faixa rosa"><span>Troco a devolver</span><strong>{{ venda.troco_centavos|reais }}</strong></div>
+    {% endif %}
+    <div class="botoes">
+      <button class="botao" onclick="window.print()"><svg class="i"><use href="#i-printer"/></svg> Imprimir comprovante</button>
+      <a class="botao sec" href="{% url 'pedido' %}"><svg class="i"><use href="#i-plus"/></svg> Nova venda</a>
+    </div>
+  </section>
+
+  <article class="recibo">
+    <div class="c"><b>SALGATERIA DA JÉSSICA</b>Comprovante de venda<small>Documento sem valor fiscal</small></div>
+    <hr>
+    <div class="l"><span>Venda</span><span>{{ venda.codigo }}</span></div>
+    <div class="l"><span>Data/hora</span><span>{{ venda.criada_em|date:"d/m/Y H:i" }}</span></div>
+    <div class="l"><span>Atendente</span><span>{{ venda.atendente.first_name|default:venda.atendente.username }}</span></div>
+    <hr>
     {% for i in venda.itens.all %}
-    <tr><td>{{ i.quantidade }} × {{ i.produto.nome }} ({{ i.preco }})</td><td class="dir">{{ i.subtotal }}</td></tr>
+    <div class="l"><span>{{ i.quantidade }} × {{ i.produto.nome }}</span><span>{{ i.subtotal_centavos|num }}</span></div>
+    <small>{{ i.preco_unitario_centavos|reais }} cada</small>
     {% endfor %}
-    <tr><th>Total</th><th class="dir">{{ venda.total }}</th></tr>
-  </table>
-  <p>Pagamento: {{ venda.get_forma_pagamento_display }}
-    {% if venda.forma_pagamento == "dinheiro" %}· Troco: {{ venda.troco }}{% endif %}</p>
-  <p><small>Sem valor fiscal.</small></p>
-  <a href="{% url 'pedido' %}"><button class="b" type="button">Nova venda</button></a>
+    <hr>
+    <div class="l t"><span>TOTAL</span><span>{{ venda.total_centavos|reais }}</span></div>
+    <div class="l"><span>Pagamento</span><span>{{ venda.get_forma_pagamento_display }}</span></div>
+    {% if venda.forma_pagamento == "dinheiro" %}
+    <div class="l"><span>Recebido</span><span>{{ venda.recebido_centavos|reais }}</span></div>
+    <div class="l"><span>Troco</span><span>{{ venda.troco_centavos|reais }}</span></div>
+    {% endif %}
+    <hr>
+    <div class="c"><small>Volte sempre!</small></div>
+  </article>
 </div>
 {% endblock %}

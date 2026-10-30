@@ -1,48 +1,107 @@
 {% extends "loja/base.html" %}
+{% load dinheiro %}
+{% block mensagens %}{% endblock %}
 {% block conteudo %}
-<h2>Nova venda</h2>
+<div class="grade">
+  <section class="cartao">
+    <h1>Buscar produto</h1>
+    <p class="sub">Pesquise por nome ou categoria e confira preço e saldo antes de vender.</p>
 
-<form method="get" class="caixa">
-  <input name="q" value="{{ busca }}" placeholder="Buscar produto ou categoria">
-  <button class="b">Buscar</button>
-</form>
+    <form method="get" class="busca">
+      <input type="hidden" name="cat" value="{{ cat }}">
+      <div style="flex:1">
+        <label class="campo" for="q">Nome do produto</label>
+        <div class="entrada"><svg class="i"><use href="#i-search"/></svg>
+          <input id="q" name="q" value="{{ q }}" placeholder="Ex.: coxinha, pastel, refrigerante"></div>
+      </div>
+      <button class="botao" style="align-self:flex-end;height:52px">Buscar</button>
+    </form>
 
-<table>
-  <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Saldo</th><th></th></tr>
-  {% for p in produtos %}
-  <tr>
-    <td>{{ p.nome }}</td><td>{{ p.categoria }}</td><td>{{ p.preco }}</td><td>{{ p.saldo }}</td>
-    <td class="dir">
-      {% if p.saldo > 0 %}
-      <form method="post" action="{% url 'adicionar' p.id %}" class="inline">{% csrf_token %}
-        <input type="number" name="qtd" value="1" min="1" style="width:55px">
-        <button class="b">Adicionar</button>
-      </form>
-      {% else %}sem saldo{% endif %}
-    </td>
-  </tr>
-  {% empty %}
-  <tr><td colspan="5">Nenhum produto encontrado.</td></tr>
-  {% endfor %}
-</table>
+    <div class="chips">
+      {% for chave, nome in categorias %}
+        <a class="chip {% if chave == cat %}sel{% endif %}" href="?q={{ q|urlencode }}&cat={{ chave }}">{{ nome }}</a>
+      {% endfor %}
+    </div>
 
-<h3>Pedido</h3>
-<table>
-  {% for l in linhas %}
-  <tr>
-    <td>{{ l.qtd }} × {{ l.produto.nome }}</td><td>{{ l.subtotal }}</td>
-    <td class="dir">
-      <form method="post" action="{% url 'remover' l.produto.id %}" class="inline">{% csrf_token %}
-        <button class="b cinza">Remover</button>
-      </form>
-    </td>
-  </tr>
-  {% empty %}
-  <tr><td>O pedido está vazio.</td></tr>
-  {% endfor %}
-</table>
-{% if linhas %}
-<p><strong>Total: {{ total }}</strong>
-  <a href="{% url 'pagamento' %}"><button class="b" type="button">Ir para o pagamento</button></a></p>
-{% endif %}
+    {% for m in messages %}
+      <div class="aviso {{ m.tags }}"><svg class="i"><use href="#i-{% if m.tags == 'success' %}check{% else %}info{% endif %}"/></svg> {{ m }}</div>
+    {% endfor %}
+
+    {% if not buscou %}
+      <div class="vazio">
+        <div class="icone"><svg class="i"><use href="#i-box"/></svg></div>
+        <strong>Nenhuma busca ainda</strong>
+        <p>Digite o nome de um produto ou escolha uma categoria para ver preço e saldo disponíveis.</p>
+      </div>
+    {% else %}
+      <div class="cab"><h2 style="font-size:18px">{{ produtos|length }} produto{{ produtos|length|pluralize }} encontrado{{ produtos|length|pluralize }}</h2>
+        <span>Busca: “{{ q }}” · Categoria: {{ cat_nome }}</span></div>
+      {% if produtos %}
+      <table>
+        <tr><th>Produto</th><th>Preço</th><th>Saldo</th><th>Quantidade</th><th></th></tr>
+        {% for p in produtos %}
+        <tr>
+          <td>{{ p.nome }}
+            <small>{{ p.get_categoria_display }} · {{ p.unidade }}
+              {% if p.no_pedido %}<span class="selo no">No pedido: {{ p.no_pedido }}</span>{% endif %}</small></td>
+          <td><b>{{ p.preco_centavos|reais }}</b></td>
+          <td>{% if p.saldo > 0 %}<span class="selo">{{ p.saldo }} un</span>{% else %}<span class="selo zero">Esgotado</span>{% endif %}</td>
+          <td colspan="2">
+            <form method="post" action="{% url 'adicionar' p.id %}" class="acao" style="justify-content:flex-start">
+              {% csrf_token %}<input type="hidden" name="voltar" value="{{ voltar }}">
+              {% if p.saldo > 0 %}
+              <div class="qtd" data-qtd>
+                <button type="button" data-d="-1" aria-label="Diminuir"><svg class="i"><use href="#i-minus"/></svg></button>
+                <input name="qtd" type="number" value="1" min="1" max="{{ p.saldo }}">
+                <button type="button" data-d="1" aria-label="Aumentar"><svg class="i"><use href="#i-plus"/></svg></button>
+              </div>
+              <button class="botao">Adicionar</button>
+              {% else %}
+              <div class="qtd off"><button type="button" disabled><svg class="i"><use href="#i-minus"/></svg></button><span>0</span><button type="button" disabled><svg class="i"><use href="#i-plus"/></svg></button></div>
+              <button class="botao off" disabled>Sem saldo</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+        <div class="vazio"><strong>Nenhum produto encontrado</strong><p>Tente outro nome ou outra categoria.</p></div>
+      {% endif %}
+    {% endif %}
+  </section>
+
+  <aside class="cartao painel">
+    <div class="cab"><h2>Pedido atual</h2>
+      <span>{{ linhas|length }} ite{{ linhas|length|pluralize:"m,ns" }}{% if linhas %} · {{ unidades }} unidade{{ unidades|pluralize }}{% endif %}</span></div>
+    {% for l in linhas %}
+    <div class="item-ped {% if l.produto.id == ultimo %}destaque{% endif %}">
+      <div class="topo2"><span>{{ l.produto.nome }}</span><span>{{ l.subtotal|reais }}</span></div>
+      <div class="muda peq">{{ l.qtd }} × {{ l.preco|reais }}</div>
+      <div class="base">
+        <form method="post" action="{% url 'alterar' l.produto.id %}" class="qtd peq">{% csrf_token %}
+          <input type="hidden" name="voltar" value="{{ voltar }}">
+          <button name="delta" value="-1" aria-label="Diminuir"><svg class="i"><use href="#i-minus"/></svg></button>
+          <span>{{ l.qtd }}</span>
+          <button name="delta" value="1" aria-label="Aumentar"><svg class="i"><use href="#i-plus"/></svg></button>
+        </form>
+        <form method="post" action="{% url 'remover' l.produto.id %}">{% csrf_token %}
+          <input type="hidden" name="voltar" value="{{ voltar }}">
+          <button class="remover"><svg class="i"><use href="#i-trash"/></svg> Remover</button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="vazio"><div class="icone" style="background:none"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <strong>Nenhum item adicionado</strong><p>Busque um produto e adicione ao pedido.</p></div>
+    {% endfor %}
+    <div class="total"><span class="muda">Total</span><strong>{{ total|reais }}</strong></div>
+    {% if linhas %}
+      <a class="botao" href="{% url 'pagamento' %}">Escolher forma de pagamento <svg class="i"><use href="#i-arrow-r"/></svg></a>
+    {% else %}
+      <span class="botao off">Escolher forma de pagamento</span>
+      <p class="nota">Inclua pelo menos um item para continuar.</p>
+    {% endif %}
+  </aside>
+</div>
 {% endblock %}

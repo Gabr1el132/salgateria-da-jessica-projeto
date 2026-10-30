@@ -1,0 +1,6 @@
+<ol class="passos no-print">
+{% for p in passos %}
+  <li class="passo {{ p.estado }}"><span class="bola">{% if p.estado == "done" %}<svg class="i"><use href="#i-check"/></svg>{% else %}{{ p.n }}{% endif %}</span> {{ p.nome }}</li>
+  {% if not forloop.last %}<li class="linha {% if p.estado == 'done' %}ok{% endif %}" aria-hidden="true"></li>{% endif %}
+{% endfor %}
+</ol>

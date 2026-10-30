@@ -1,11 +1,15 @@
 {% extends "loja/base.html" %}
+{% load dinheiro %}
 {% block conteudo %}
-<h2>Estoque</h2>
-<table>
-  <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Saldo</th></tr>
-  {% for p in produtos %}
-  <tr><td>{{ p.nome }}</td><td>{{ p.categoria }}</td><td>{{ p.preco }}</td><td>{{ p.saldo }}</td></tr>
-  {% endfor %}
-</table>
-<p><small>Para repor ou cadastrar produtos nesta prévia, use o <a href="/admin/">Admin</a>.</small></p>
+<section class="cartao">
+  <h1>Estoque</h1><p class="sub">Preço e saldo de cada produto. Para repor ou cadastrar, use o <a href="/admin/">Admin</a>.</p>
+  <table>
+    <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Saldo</th></tr>
+    {% for p in produtos %}
+    <tr><td><b>{{ p.nome }}</b><small>{{ p.unidade }}</small></td><td>{{ p.get_categoria_display }}</td>
+      <td>{{ p.preco_centavos|reais }}</td>
+      <td>{% if p.saldo > 0 %}<span class="selo">{{ p.saldo }} un</span>{% else %}<span class="selo zero">Esgotado</span>{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+</section>
 {% endblock %}

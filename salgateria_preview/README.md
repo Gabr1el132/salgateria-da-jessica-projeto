@@ -1,22 +1,26 @@
-# Salgateria da Jéssica — prévia simplificada
+# Salgateria da Jéssica — prévia
 
-Versão enxuta do sistema: login, busca de produtos, pedido com validação de saldo,
-pagamento (dinheiro com troco, Pix, cartão), baixa de estoque e comprovante.
-Estilo mínimo, sem dependências além do Django.
+Prévia enxuta do sistema, com o fluxo de telas do protótipo:
+**Login → Produtos (busca e pedido) → Pagamento → Registro → Comprovante**,
+além de listas de Vendas e Estoque.
 
-## Rodar
+## Rodar (Windows: use `py` no lugar de `python`)
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python manage.py makemigrations loja
 python manage.py migrate
 python manage.py popular_demo
 python manage.py runserver
 ```
-Abra http://127.0.0.1:8000/ — usuários `jessica` e `carla`, senha `demo1234`.
+Abra http://127.0.0.1:8000/ — usuários `carla` (atendente) e `jessica` (proprietária), senha `demo1234`.
+
+Se você já tinha rodado uma versão anterior da prévia, apague `db.sqlite3` e `loja/migrations/0001_initial.py` antes de rodar os comandos acima.
 
 ## Estrutura
 - `config/` configurações e rotas
-- `loja/` modelos (Produto, Venda, ItemVenda), views, templates e comando `popular_demo`
+- `loja/models.py` Produto, Venda, ItemVenda (valores em centavos inteiros)
+- `loja/views.py` fluxo de venda; o pedido fica na sessão, e a venda, o pagamento e a baixa de estoque são gravados numa única transação
+- `loja/templates/loja/` telas; `loja/static/loja/` CSS e JS próprios (sem dependência externa)
+- `loja/management/commands/popular_demo.py` usuários e 14 produtos de demonstração
 
-Valores em centavos inteiros; a venda e a baixa de estoque acontecem numa única transação.
-Fora desta prévia: histórico de movimentos, relatório, CRUD de catálogo e perfis (use o `/admin/`).
+Fora da prévia: reposição/ajuste de estoque, histórico de movimentos, relatório, cancelamento e CRUD de catálogo (use `/admin/` com a Jéssica).

@@ -1,16 +1,13 @@
 from django.conf import settings
 from django.db import models
 
-
-def reais(centavos):
-    """750 -> 'R$ 7,50'"""
-    inteiro, resto = divmod(int(centavos), 100)
-    return f"R$ {inteiro:,}".replace(",", ".") + f",{resto:02d}"
+CATEGORIAS = [("fritos", "Fritos"), ("assados", "Assados"), ("bebidas", "Bebidas"), ("pacotes", "Pacotes")]
 
 
 class Produto(models.Model):
     nome = models.CharField(max_length=80)
-    categoria = models.CharField(max_length=40)
+    categoria = models.CharField(max_length=20, choices=CATEGORIAS)
+    unidade = models.CharField(max_length=20, default="unidade")
     preco_centavos = models.PositiveIntegerField()
     saldo = models.PositiveIntegerField(default=0)
     ativo = models.BooleanField(default=True)
@@ -20,10 +17,6 @@ class Produto(models.Model):
 
     def __str__(self):
         return self.nome
-
-    @property
-    def preco(self):
-        return reais(self.preco_centavos)
 
 
 class Venda(models.Model):
@@ -36,12 +29,12 @@ class Venda(models.Model):
     recebido_centavos = models.PositiveIntegerField(default=0)
 
     @property
-    def total(self):
-        return reais(self.total_centavos)
+    def codigo(self):
+        return f"V-{self.id:06d}"
 
     @property
-    def troco(self):
-        return reais(max(self.recebido_centavos - self.total_centavos, 0))
+    def troco_centavos(self):
+        return max(self.recebido_centavos - self.total_centavos, 0)
 
 
 class ItemVenda(models.Model):
@@ -51,9 +44,5 @@ class ItemVenda(models.Model):
     preco_unitario_centavos = models.PositiveIntegerField()
 
     @property
-    def subtotal(self):
-        return reais(self.quantidade * self.preco_unitario_centavos)
-
-    @property
-    def preco(self):
-        return reais(self.preco_unitario_centavos)
+    def subtotal_centavos(self):
+        return self.quantidade * self.preco_unitario_centavos

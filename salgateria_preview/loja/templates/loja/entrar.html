@@ -1,13 +1,28 @@
 {% extends "loja/base.html" %}
-{% block conteudo %}
-<div class="caixa" style="max-width:320px;margin:auto">
-  <h2>Entrar</h2>
-  {% if form.errors %}<div class="msg">Usuário ou senha incorretos.</div>{% endif %}
-  <form method="post">{% csrf_token %}
-    <p><label>Usuário<br>{{ form.username }}</label></p>
-    <p><label>Senha<br>{{ form.password }}</label></p>
-    <button class="b">Entrar</button>
-  </form>
-  <p><small>Teste: carla / demo1234</small></p>
+{% block corpo %}
+<div class="entrar">
+  <section class="lado">
+    <div class="marca"><span class="logo">SJ</span> Salgateria da Jéssica</div>
+    <h1>Vendas e estoque no mesmo lugar.</h1>
+    <p>Busque produtos, monte o pedido, registre o pagamento e entregue o comprovante em poucos passos.</p>
+    <div class="aro"></div>
+  </section>
+  <section class="form"><div>
+    <h1>Entrar</h1>
+    <p class="sub">Use seu login e sua senha para acessar o sistema.</p>
+    {% if form.errors %}<div class="aviso error"><svg class="i"><use href="#i-info"/></svg> Login ou senha incorretos.</div>{% endif %}
+    <form method="post">{% csrf_token %}
+      <label class="campo" for="id_username">Login</label>
+      <div class="entrada"><svg class="i"><use href="#i-user"/></svg>
+        <input name="username" id="id_username" autofocus autocomplete="username" required></div>
+      <label class="campo" for="id_password">Senha</label>
+      <div class="entrada"><svg class="i"><use href="#i-lock"/></svg>
+        <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+        <button type="button" data-olho aria-label="Mostrar senha"><svg class="i"><use href="#i-eye"/></svg></button></div>
+      <button class="botao">Entrar <svg class="i"><use href="#i-arrow-r"/></svg></button>
+    </form>
+    <div class="cartao"><svg class="i"><use href="#i-info"/></svg>
+      <span>Conta inativa ou sem acesso? Fale com a proprietária para ativar o seu usuário.</span></div>
+  </div></section>
 </div>
 {% endblock %}

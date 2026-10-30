@@ -1,0 +1,38 @@
+{% extends "loja/base.html" %}
+{% load dinheiro %}
+{% block conteudo %}
+<div class="grade">
+  <section class="cartao">
+    <h1>Registrar a venda</h1>
+    <p class="sub">Confira os itens e o recebimento antes de concluir.</p>
+    <table>
+      <tr><th>Produto</th><th class="d">Qtd.</th><th class="d">Preço unit.</th><th class="d">Subtotal</th></tr>
+      {% for l in linhas %}
+      <tr><td><b>{{ l.produto.nome }}</b></td><td class="d">{{ l.qtd }}</td><td class="d">{{ l.preco|reais }}</td><td class="d"><b>{{ l.subtotal|reais }}</b></td></tr>
+      {% endfor %}
+    </table>
+    <div class="grande-total"><span class="muda">Total</span><strong>{{ total|reais }}</strong></div>
+    <div class="info"><svg class="i"><use href="#i-info"/></svg>
+      <span>Ao registrar, o estoque é baixado uma única vez e o preço de cada item fica guardado na venda. Depois de concluída, a venda não pode mais ser editada.</span></div>
+  </section>
+
+  <aside class="cartao painel">
+    <h2>Pagamento</h2>
+    <div class="linha-kv"><span>Forma de pagamento</span>
+      <b style="color:var(--laranja)"><svg class="i"><use href="#i-{% if forma == 'dinheiro' %}cash{% elif forma == 'pix' %}qr{% else %}card{% endif %}"/></svg>
+        <span style="color:var(--tinta)">{{ forma_nome }}</span></b></div>
+    <div class="linha-kv"><span>Total da venda</span><b>{{ total|reais }}</b></div>
+    {% if forma == "dinheiro" %}
+      <div class="linha-kv"><span>Valor recebido</span><b>{{ recebido|reais }}</b></div>
+      <div class="faixa"><span>Troco a devolver</span><strong>{{ troco|reais }}</strong></div>
+    {% else %}
+      <div class="faixa"><span>Recebimento</span><span>Confirmação manual</span></div>
+    {% endif %}
+    <div class="linha-kv"><span>Atendente</span><b>{{ user.first_name|default:user.username }}</b></div>
+    <form method="post" style="margin-top:16px">{% csrf_token %}
+      <button class="botao"><svg class="i"><use href="#i-check"/></svg> Confirmar recebimento e registrar venda</button>
+    </form>
+    <a class="botao sec" href="{% url 'pagamento' %}"><svg class="i"><use href="#i-arrow-l"/></svg> Voltar ao pagamento</a>
+  </aside>
+</div>
+{% endblock %}

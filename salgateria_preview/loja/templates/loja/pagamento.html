@@ -1,21 +1,56 @@
 {% extends "loja/base.html" %}
+{% load dinheiro %}
 {% block conteudo %}
-<h2>Pagamento</h2>
-<table>
-  {% for l in linhas %}<tr><td>{{ l.qtd }} × {{ l.produto.nome }}</td><td>{{ l.subtotal }}</td></tr>{% endfor %}
-  <tr><th>Total</th><th>{{ total }}</th></tr>
-</table>
+<form method="post" id="formpag" data-total="{{ total }}">{% csrf_token %}
+<div class="grade">
+  <section class="cartao">
+    <h1>Forma de pagamento</h1>
+    <p class="sub">Cada venda usa um único meio: dinheiro, Pix ou cartão.</p>
+    {% if erro %}<div class="aviso error"><svg class="i"><use href="#i-info"/></svg> {{ erro }}</div>{% endif %}
 
-{% if erro %}<div class="msg" style="margin-top:12px">{{ erro }}</div>{% endif %}
-<form method="post" class="caixa" style="margin-top:12px">{% csrf_token %}
-  <p>
-    <label><input type="radio" name="forma" value="dinheiro" checked> Dinheiro</label>
-    <label><input type="radio" name="forma" value="pix"> Pix</label>
-    <label><input type="radio" name="forma" value="cartao"> Cartão</label>
-  </p>
-  <p><label>Valor recebido (só dinheiro): R$ <input name="recebido" placeholder="0,00" size="8"></label></p>
-  <p><small>Pix e cartão: confirme o pagamento na maquininha/app antes de concluir.</small></p>
-  <button class="b">Concluir venda</button>
-  <a href="{% url 'pedido' %}">Voltar</a>
+    <div class="opcoes">
+      <label class="opcao {% if forma == 'dinheiro' %}sel{% endif %}">
+        <input type="radio" name="forma" value="dinheiro" {% if forma == 'dinheiro' %}checked{% endif %}>
+        <span class="ico"><svg class="i"><use href="#i-cash"/></svg></span>
+        <span class="ok"><svg class="i"><use href="#i-check"/></svg></span>
+        <strong>Dinheiro</strong><span class="d">Informe o valor recebido e veja o troco.</span></label>
+      <label class="opcao {% if forma == 'pix' %}sel{% endif %}">
+        <input type="radio" name="forma" value="pix" {% if forma == 'pix' %}checked{% endif %}>
+        <span class="ico"><svg class="i"><use href="#i-qr"/></svg></span>
+        <span class="ok"><svg class="i"><use href="#i-check"/></svg></span>
+        <strong>Pix</strong><span class="d">Confirme o recebimento manualmente.</span></label>
+      <label class="opcao {% if forma == 'cartao' %}sel{% endif %}">
+        <input type="radio" name="forma" value="cartao" {% if forma == 'cartao' %}checked{% endif %}>
+        <span class="ico"><svg class="i"><use href="#i-card"/></svg></span>
+        <span class="ok"><svg class="i"><use href="#i-check"/></svg></span>
+        <strong>Cartão</strong><span class="d">Confirme o recebimento na maquininha.</span></label>
+    </div>
+
+    <div data-dinheiro {% if forma != 'dinheiro' %}hidden{% endif %}>
+      <label class="campo">Valor recebido do cliente</label>
+      <div class="rapidos">
+        {% for r in rapidos %}<button type="button" class="rapido" data-valor="{{ r.c }}">{{ r.c|reais }}{% if r.exato %} (exato){% endif %}</button>{% endfor %}
+      </div>
+      <div class="entrada outro"><span class="muda">R$</span>
+        <input name="recebido" inputmode="decimal" placeholder="Outro valor, ex.: 60,00" value="{% if recebido %}{{ recebido|num }}{% endif %}"></div>
+      <div class="tiles">
+        <div class="tile"><small>Total do pedido</small><strong>{{ total|reais }}</strong></div>
+        <div class="tile"><small>Valor recebido</small><strong data-recebido>R$ 0,00</strong></div>
+        <div class="tile verde"><small>Troco a devolver</small><strong data-troco>R$ 0,00</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="cartao painel">
+    <div class="cab"><h2>Resumo do pedido</h2><span>{{ linhas|length }} ite{{ linhas|length|pluralize:"m,ns" }}</span></div>
+    {% for l in linhas %}
+    <div class="resumo-item"><span><b>{{ l.produto.nome }}</b><small>{{ l.qtd }} × {{ l.preco|reais }}</small></span><b>{{ l.subtotal|reais }}</b></div>
+    {% endfor %}
+    <div class="linha-kv"><span>Forma de pagamento</span><b data-forma>{{ forma_nome }}</b></div>
+    <div class="total" style="border-top:0;padding-top:4px"><span class="muda">Total</span><strong>{{ total|reais }}</strong></div>
+    <button class="botao">Revisar e registrar <svg class="i"><use href="#i-arrow-r"/></svg></button>
+    <a class="botao sec" href="{% url 'pedido' %}"><svg class="i"><use href="#i-arrow-l"/></svg> Voltar ao pedido</a>
+  </aside>
+</div>
 </form>
 {% endblock %}

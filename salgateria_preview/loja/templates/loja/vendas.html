@@ -1,14 +1,15 @@
 {% extends "loja/base.html" %}
+{% load dinheiro %}
 {% block conteudo %}
-<h2>Vendas</h2>
-<table>
-  <tr><th>#</th><th>Data</th><th>Atendente</th><th>Pagamento</th><th>Total</th></tr>
-  {% for v in vendas %}
-  <tr>
-    <td><a href="{% url 'comprovante' v.id %}">{{ v.id }}</a></td>
-    <td>{{ v.criada_em|date:"d/m/Y H:i" }}</td><td>{{ v.atendente.username }}</td>
-    <td>{{ v.get_forma_pagamento_display }}</td><td>{{ v.total }}</td>
-  </tr>
-  {% empty %}<tr><td colspan="5">Nenhuma venda registrada.</td></tr>{% endfor %}
-</table>
+<section class="cartao">
+  <h1>Vendas</h1><p class="sub">Últimas 50 vendas registradas.</p>
+  <table>
+    <tr><th>Venda</th><th>Data/hora</th><th>Atendente</th><th>Pagamento</th><th class="d">Total</th></tr>
+    {% for v in vendas %}
+    <tr><td><a href="{% url 'comprovante' v.id %}"><b>{{ v.codigo }}</b></a></td>
+      <td>{{ v.criada_em|date:"d/m/Y H:i" }}</td><td>{{ v.atendente.first_name|default:v.atendente.username }}</td>
+      <td>{{ v.get_forma_pagamento_display }}</td><td class="d"><b>{{ v.total_centavos|reais }}</b></td></tr>
+    {% empty %}<tr><td colspan="5" class="muda">Nenhuma venda registrada ainda.</td></tr>{% endfor %}
+  </table>
+</section>
 {% endblock %}

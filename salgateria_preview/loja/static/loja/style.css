@@ -173,3 +173,12 @@ td small { display: block; color: var(--muda); font-size: 13px; }
   .no-print, .topo { display: none !important; }
   body { background: #fff; } .pagina { padding: 0; } .recibo { box-shadow: none; border: 0; margin: 0 auto; }
 }
+
+/* vendas: filtro por dia e resumo */
+.filtro-dia { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+.filtro-dia input[type=date] { padding: 9px 12px; border: 1.5px solid var(--borda); border-radius: 10px; font: inherit; background: #fff; }
+.filtro-dia .botao { width: auto; }
+.resumo-titulo { margin: 28px 0 12px; }
+.total-dia { margin: 14px 0 0; padding: 18px; }
+.total-dia strong { font-size: 28px; letter-spacing: -0.02em; }
+@media (max-width: 640px) { .tiles { grid-template-columns: 1fr; } }

@@ -1,12 +1,14 @@
 import unicodedata
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import F
+from django.db.models import Count, F, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
@@ -240,8 +242,38 @@ def comprovante(request, venda_id):
 
 @login_required
 def vendas(request):
-    lista = Venda.objects.select_related("atendente").order_by("-criada_em")[:50]
-    return render(request, "loja/vendas.html", {"vendas": lista})
+    """Vendas de um dia (hoje por padrão) com o total de cada forma de pagamento."""
+    hoje = timezone.localdate()
+    try:
+        dia = date.fromisoformat(request.GET.get("data", ""))
+    except ValueError:
+        dia = hoje
+
+    do_dia = Venda.objects.filter(criada_em__date=dia)
+    lista = do_dia.select_related("atendente").order_by("-criada_em")
+
+    # soma e quantidade de vendas por forma de pagamento (uma consulta só)
+    somas = {
+        r["forma_pagamento"]: r
+        for r in do_dia.values("forma_pagamento").annotate(
+            total=Sum("total_centavos"), qtd=Count("id"))
+    }
+    por_forma = []
+    for chave, nome in Venda.FORMAS:
+        r = somas.get(chave, {})
+        por_forma.append({"chave": chave, "nome": nome,
+                          "total": r.get("total", 0), "qtd": r.get("qtd", 0)})
+
+    return render(request, "loja/vendas.html", {
+        "vendas": lista,
+        "dia": dia,
+        "eh_hoje": dia == hoje,
+        "anterior": dia - timedelta(days=1),
+        "proximo": dia + timedelta(days=1) if dia < hoje else None,
+        "por_forma": por_forma,
+        "total_dia": sum(f["total"] for f in por_forma),
+        "qtd_dia": sum(f["qtd"] for f in por_forma),
+    })
 
 
 @login_required

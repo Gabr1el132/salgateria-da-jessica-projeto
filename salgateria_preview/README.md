@@ -2,7 +2,7 @@
 
 Atividade de AEX — *Do modelo ao sistema web* · Programação para Internet (UENP, Campus Luiz Meneghel) + Engenharia de Software II.
 
-**Integrantes:** Gabriel Ramos, Marcelo Sousa, Rafael Cunha
+**Integrantes:** Gabriel Ramos, Marcelo Sousa, Rafael Cunha, Lucas dos Santos
 
 Sistema web que apoia o ponto de venda e o controle de estoque da Salgateria da Jéssica, implementado a partir da especificação de Engenharia de Software II (10 histórias de usuário, 16 requisitos funcionais, regras de negócio e diagramas UML).
 

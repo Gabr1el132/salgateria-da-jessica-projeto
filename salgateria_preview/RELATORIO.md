@@ -1,6 +1,6 @@
 # Relatório — Salgateria da Jéssica (AEX · Programação para Internet)
 
-**Equipe:** Gabriel Ramos, Marcelo Sousa, Rafael Cunha · **Tecnologia:** Python + Django + SQLite
+**Equipe:** Gabriel Ramos, Marcelo Sousa, Rafael Cunha, Lucas dos Santos · **Tecnologia:** Python + Django + SQLite
 
 ## 1. O que foi implementado
 Sistema web completo para o fluxo de venda do diagrama de atividades: login por perfil, busca de produtos com preço e saldo, pedido com validação de saldo, pagamento em dinheiro (com troco), Pix e cartão (confirmação manual), conclusão com baixa de estoque e comprovante imprimível. Também: catálogo (cadastrar, editar, inativar, excluir), consulta de estoque, reposição, ajuste de inventário com histórico de movimentos, lista de vendas e relatório por período e forma de pagamento. As 10 histórias de usuário e os 16 requisitos funcionais foram cobertos.

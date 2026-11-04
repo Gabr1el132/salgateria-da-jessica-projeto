@@ -2,14 +2,40 @@
 {% load dinheiro %}
 {% block conteudo %}
 <section class="cartao">
-  <h1>Vendas</h1><p class="sub">Últimas 50 vendas registradas.</p>
+  <h1>Vendas</h1>
+  <p class="sub">
+    {% if eh_hoje %}Vendas de hoje ({{ dia|date:"d/m/Y" }}).{% else %}Vendas do dia {{ dia|date:"d/m/Y" }}.{% endif %}
+  </p>
+
+  <form method="get" class="filtro-dia">
+    <a class="botao sec peq" href="?data={{ anterior|date:'Y-m-d' }}">&larr; Dia anterior</a>
+    <input type="date" name="data" value="{{ dia|date:'Y-m-d' }}" max="{% now 'Y-m-d' %}" onchange="this.form.submit()">
+    {% if proximo %}<a class="botao sec peq" href="?data={{ proximo|date:'Y-m-d' }}">Próximo dia &rarr;</a>{% endif %}
+    {% if not eh_hoje %}<a class="botao sec peq" href="{% url 'vendas' %}">Hoje</a>{% endif %}
+  </form>
+
   <table>
     <tr><th>Venda</th><th>Data/hora</th><th>Atendente</th><th>Pagamento</th><th class="d">Total</th></tr>
     {% for v in vendas %}
     <tr><td><a href="{% url 'comprovante' v.id %}"><b>{{ v.codigo }}</b></a></td>
       <td>{{ v.criada_em|date:"d/m/Y H:i" }}</td><td>{{ v.atendente.first_name|default:v.atendente.username }}</td>
-      <td>{{ v.get_forma_pagamento_display }}</td><td class="d"><b>{{ v.total_centavos|reais }}</b></td></tr>
-    {% empty %}<tr><td colspan="5" class="muda">Nenhuma venda registrada ainda.</td></tr>{% endfor %}
+      <td><span class="selo no">{{ v.get_forma_pagamento_display }}</span></td>
+      <td class="d"><b>{{ v.total_centavos|reais }}</b></td></tr>
+    {% empty %}<tr><td colspan="5" class="muda">Nenhuma venda registrada neste dia.</td></tr>{% endfor %}
   </table>
+
+  <h2 class="resumo-titulo">Resumo do dia</h2>
+  <div class="tiles">
+    {% for f in por_forma %}
+    <div class="tile">
+      <small>{{ f.nome }} &middot; {{ f.qtd }} venda{{ f.qtd|pluralize }}</small>
+      <strong>{{ f.total|reais }}</strong>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="faixa total-dia">
+    <span>Total do dia &middot; {{ qtd_dia }} venda{{ qtd_dia|pluralize }}</span>
+    <strong>{{ total_dia|reais }}</strong>
+  </div>
 </section>
 {% endblock %}
